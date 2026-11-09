@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sistema Alumnos · Guía 2 (versión corta): Documentación y trazabilidad</title>
+<style>
+:root{--paper:#ECEFF3;--panel:#F8F9FB;--ink:#0C1424;--ink-2:#4A5568;--line:#C9D0DA;
+--signal:#2B3AE8;--pass:#0B7F57;--fail:#CC2F2A;--warn:#A86B0A;--code-bg:#0C1424;--code-ink:#DCE3F1;
+--font-display:"Archivo","Arial Narrow","Helvetica Neue",Arial,sans-serif;
+--font-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+--font-mono:"IBM Plex Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#0A0F1A;--panel:#111827;--ink:#E8ECF4;--ink-2:#98A4BA;--line:#26304A;
+--signal:#8D99FF;--pass:#3FCB98;--fail:#FF7069;--warn:#E9B24E;--code-bg:#060A12;color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#0A0F1A;--panel:#111827;--ink:#E8ECF4;--ink-2:#98A4BA;--line:#26304A;
+--signal:#8D99FF;--pass:#3FCB98;--fail:#FF7069;--warn:#E9B24E;--code-bg:#060A12;color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:5rem}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-body);line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3,p{margin:0}
+h1,h3{font-family:var(--font-display);font-stretch:118%;text-wrap:balance;line-height:1.05}
+code,pre{font-family:var(--font-mono)}
+code{font-size:.88em;background:color-mix(in srgb,var(--ink) 8%,transparent);padding:.05rem .3rem;border-radius:3px}
+a{color:var(--signal)}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--signal);outline-offset:2px;border-radius:3px}
+
+.bar{position:sticky;top:0;z-index:5;background:var(--paper);border-bottom:1px solid var(--line);padding:.6rem max(1rem,env(safe-area-inset-right,0px)) .6rem max(1rem,env(safe-area-inset-left,0px))}
+.bar-in{max-width:46rem;margin:0 auto;display:flex;align-items:center;gap:.7rem;font-family:var(--font-mono);font-size:.75rem;color:var(--ink-2)}
+.bar-in b{color:var(--ink);font-weight:500;white-space:nowrap}
+.track{flex:1;height:5px;background:var(--line);border-radius:3px;overflow:hidden;min-width:2rem}
+.track i{display:block;height:100%;width:0;background:var(--pass);transition:width .3s}
+.btn{background:transparent;border:1px solid var(--line);border-radius:4px;padding:.25rem .55rem;font-family:var(--font-mono);font-size:.72rem;white-space:nowrap}
+.btn:hover{border-color:var(--ink)}
+
+main{max-width:46rem;margin:0 auto;padding:2.5rem max(1rem,env(safe-area-inset-right,0px)) 5rem max(1rem,env(safe-area-inset-left,0px));display:grid;gap:1.1rem}
+.eyebrow{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
+h1{font-size:clamp(2.2rem,8vw,3.6rem);font-weight:900;font-stretch:125%;line-height:.98;margin:.6rem 0 1rem}
+.lede{color:var(--ink-2);font-size:1.05rem;max-width:40rem}
+.gates{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin:1.4rem 0 .4rem;font-family:var(--font-mono);font-size:.85rem}
+.gate{border:2px solid var(--pass);color:var(--pass);border-radius:4px;padding:.35rem .8rem;font-weight:500}
+.gate.sec{border-color:var(--signal);color:var(--signal)}
+.gate.doc{border-color:var(--ink);color:var(--ink)}
+.arrow{color:var(--ink-2)}
+.legend{font-size:.82rem;color:var(--ink-2)}
+.legend .k{display:inline-block;width:.8rem;height:.8rem;border:2px solid var(--pass);border-radius:2px;vertical-align:-.1rem;margin-right:.2rem}
+.legend .k.sec{border-color:var(--signal)}.legend .k.doc{border-color:var(--ink)}
+.meta{display:flex;flex-wrap:wrap;gap:.4rem 1.2rem;margin-top:1rem;font-family:var(--font-mono);font-size:.78rem;color:var(--ink-2)}
+.meta b{color:var(--ink);font-weight:500}
+
+.box{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:1rem 1.2rem;display:grid;gap:.7rem}
+.box h3{font-size:1.05rem}
+.box ul,.box ol{margin:0;padding-left:1.2rem;display:grid;gap:.2rem}
+.box>*{min-width:0}
+.row{display:grid;grid-template-columns:minmax(7rem,9rem) minmax(0,1fr);gap:.4rem 1rem;align-items:center}
+.lab{font-family:var(--font-mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-2)}
+input.url{font-family:var(--font-mono);font-size:.85rem;padding:.5rem .65rem;border:1px solid var(--line);border-radius:4px;background:var(--paper);color:var(--ink);width:100%;min-width:0}
+.small,.peque{font-size:.85rem;color:var(--ink-2)}
+
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{text-align:left;padding:.5rem .9rem .5rem 0;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--font-mono);font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-2);font-weight:400}
+.glos td:first-child{width:10.5rem}
+.mapa td:nth-child(3){white-space:nowrap}
+
+h2{font-family:var(--font-display);font-stretch:112%;font-size:1.5rem;margin-top:1.6rem;line-height:1.1}
+h2.grupo{font-size:1.25rem;padding-left:.8rem;border-left:5px solid var(--ink-2)}
+h2.grupo.ga{border-color:var(--signal)}h2.grupo.gb{border-color:var(--ink)}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:1.2rem 1.3rem 1.3rem;display:grid;gap:.9rem;min-width:0}
+.card>*{min-width:0}
+.card.done{border-color:var(--pass)}
+.head{display:flex;flex-wrap:wrap;align-items:baseline;gap:.3rem .8rem}
+.head h3{font-size:1.2rem;flex:1 1 13rem}
+.num{font-family:var(--font-mono);font-size:.74rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-2)}
+.card.ga .num{color:var(--signal)}.card.gb .num{color:var(--ink)}
+.chk{display:inline-flex;align-items:center;gap:.4rem;font-family:var(--font-mono);font-size:.78rem;color:var(--ink-2);cursor:pointer;margin-left:auto}
+.chk input{accent-color:var(--pass);width:1.1rem;height:1.1rem;margin:0;cursor:pointer}
+.card.done .chk{color:var(--pass)}
+
+.cuerpo>*{margin:0}.cuerpo>*+*{margin-top:.9rem}
+.cuerpo>h3{margin-top:1.5rem;font-size:1.02rem;font-weight:700;font-stretch:112%}
+.cuerpo>h3+*{margin-top:.7rem}
+.cuerpo ul,.cuerpo ol{margin:0;padding-left:1.35rem}
+.cuerpo li+li{margin-top:.3rem}
+.cuerpo li::marker{font-family:var(--font-mono);color:var(--ink-2)}
+.cuerpo li>ul,.cuerpo li>ol{margin-top:.3rem}
+
+.code{position:relative;background:var(--code-bg);color:var(--code-ink);border-radius:5px;margin:.2rem 0}
+.code-bar{display:flex;justify-content:space-between;align-items:center;gap:.6rem;padding:.45rem .5rem 0 1rem;font-family:var(--font-mono);font-size:.68rem;color:#8E9BB8}
+.code-bar span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.copy{flex:none;background:var(--code-bg);border:1px solid #3A4663;color:var(--code-ink);border-radius:3px;font-family:var(--font-mono);font-size:.68rem;padding:.2rem .5rem}
+.copy:hover{border-color:var(--code-ink)}.copy.ok{border-color:var(--pass);color:#3FCB98}
+.code pre{margin:0;padding:.45rem 1rem .85rem;overflow-x:auto;font-size:.82rem;line-height:1.6;tab-size:4}
+.code code{background:none;padding:0;color:inherit;font-size:inherit}
+
+.callout{border-left:3px solid var(--ink-2);padding:.55rem .85rem;font-size:.93rem;background:color-mix(in srgb,var(--ink-2) 8%,transparent);border-radius:0 4px 4px 0}
+.callout>strong:first-child{color:var(--ink)}
+.callout p{margin:.3rem 0 0}.callout>strong:first-child+p{margin-top:.15rem}
+.callout ol,.callout ul{margin:.35rem 0 0;padding-left:1.3rem}.callout li+li{margin-top:.25rem}
+.callout .code{margin-top:.4rem}
+.callout.checkpoint{border-left-color:var(--pass);background:color-mix(in srgb,var(--pass) 8%,transparent)}
+.callout.ojo{border-left-color:var(--warn);background:color-mix(in srgb,var(--warn) 9%,transparent)}
+.callout.pensar{border-left-color:var(--signal);background:color-mix(in srgb,var(--signal) 8%,transparent)}
+.callout.evidencia{border:1px dashed var(--ink-2);border-left:3px solid var(--fail);background:var(--paper);border-radius:4px}
+.callout.evidencia>strong:first-child{display:block;font-family:var(--font-mono);font-size:.72rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase}
+
+details{border:1px solid var(--line);border-radius:4px;padding:.5rem .85rem;background:var(--paper)}
+details>summary{cursor:pointer;font-weight:600;font-size:.93rem}
+details[open]>summary{margin-bottom:.5rem}
+details>*:not(summary)+*{margin-top:.6rem}
+details.pista>summary{color:var(--signal)}
+.checklist{list-style:none;padding:0!important;display:grid;gap:.55rem}
+.checklist li{margin:0!important}
+.checklist label{display:flex;gap:.6rem;align-items:flex-start;cursor:pointer}
+.checklist input{accent-color:var(--pass);width:1.1rem;height:1.1rem;margin:.2rem 0 0;flex:none}
+.refs{color:var(--ink-2);font-size:.9rem}
+footer{max-width:46rem;margin:0 auto;padding:0 max(1rem,env(safe-area-inset-left,0px)) 3rem;color:var(--ink-2);font-size:.8rem;font-family:var(--font-mono)}
+@media (max-width:40rem){.row{grid-template-columns:minmax(0,1fr)}.bar-in .btn.seguir{display:none}
+.head .num{order:1}.head .chk{order:2}.head h3{order:3;flex-basis:100%}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+@media print{:root{--paper:#fff;--panel:#fff;--ink:#000;--ink-2:#333;--line:#bbb;--code-bg:#f3f3f3;--code-ink:#000}
+.bar,.copy,.chk,#datos{display:none!important}main{max-width:none;padding:0}.card,.box{break-inside:avoid-page}
+.code-bar{color:#000}}
+</style>
+</head>
+<body>
+<div class="bar"><div class="bar-in"><b id="meterTxt">Pasos 0 / 10</b><div class="track"><i id="meterBar"></i></div><button class="btn seguir" id="seguirBtn" type="button">Seguir</button><button class="btn" id="themeBtn" type="button">Tema</button></div></div>
+
+<main>
+  <header>
+    <div class="eyebrow">Guía práctica · OCY1102 Ciberseguridad en desarrollo · EA 3 · Guía 2 de 2 · versión corta</div>
+    <h1>Sistema Alumnos · Documentación y trazabilidad</h1>
+    <p class="lede">Sobre una API en Flask, su pipeline de Jenkins genera la documentación con Doxygen, exige que esté completa, la versiona en Git, despliega la app en un entorno de prueba y deja cada versión trazable hasta su commit.</p>
+    <div class="gates" aria-label="Etapas del pipeline"><span class="gate">Build</span><span class="arrow">→</span><span class="gate">Test</span><span class="arrow">→</span><span class="gate doc">Generate Documentation</span><span class="arrow">→</span><span class="gate doc">Version Control</span><span class="arrow">→</span><span class="gate doc">Deploy</span></div>
+    <div class="meta"><span><b>Tiempo</b> ≈ 2 h 30 min + entrega</span><span><b>Modalidad</b> parejas</span><span><b>Herramientas</b> Docker · Jenkins · Git · pipenv · Doxygen</span></div>
+  </header>
+
+<div class="box">
+  <h3>Cómo usar esta guía</h3>
+  <ul>
+    <li>Marquen <strong>Hecho</strong> en cada paso: el avance queda guardado en este navegador y el botón <em>Seguir</em> los lleva al siguiente paso pendiente.</li>
+    <li>Cada paso termina con un recuadro verde de <strong>Checkpoint</strong> (cómo saber que va bien) y, a veces, con uno punteado de <strong>Evidencia</strong> (captura que deben guardar para la entrega).</li>
+    <li>En pareja: una persona escribe y la otra lee y revisa; cambien de rol en cada Checkpoint. Ambos deben aparecer en el historial de Git.</li>
+    <li>Ningún secreto (tokens, contraseñas) en el repositorio ni en las capturas.</li>
+  </ul>
+  <p class="small">Esta es la guía 2 de 2. Si ya hicieron la guía de dependencias, marquen los Pasos 0 a 3 como hechos y sigan en B1.</p>
+</div>
+
+  <h2 class="grupo gx" id="g-p0">Preparación</h2>
+<article class="card gx" id="p0"><div class="head"><span class="num">Paso 0 · 10 min</span><h3>Preparen el equipo</h3><label class="chk"><input type="checkbox" data-paso="p0"> Hecho</label></div><div class="cuerpo">
+<p>Necesitan <strong>Docker con Compose</strong>, <strong>Git</strong>, una <strong>cuenta de GitHub</strong> (gratuita; la pareja usa un solo repositorio y agrega a su compañero/a como colaborador/a) y un editor como Visual Studio Code. Unos 2 GB libres e Internet.</p>
+<div class="code"><div class="code-bar"><span>Terminal</span><button type="button" class="copy" aria-label="Copiar al portapapeles">Copiar</button></div><pre><code>docker --version
+docker compose version
+docker run --rm hello-world
+git --version</code></pre></div>
+<p>Configuren su identidad en Git (una vez por equipo):</p>
+<div class="code"><div class="code-bar"><span>Terminal</span><button type="button" class="copy" aria-label="Copiar al portapapeles">Copiar</button></div><pre><code>git config --global user.name &quot;Tu Nombre&quot;
+git config --global user.email &quot;tu_correo@ejemplo.cl&quot;</code></pre></div>
+<p>Descompriman <code>sistema_alumnos.zip</code> en una ruta <strong>sin espacios ni tildes</strong> (por ejemplo <code>C:\trabajo\</code>). Dentro hay dos carpetas que usarán: <code>jenkins/</code> (el laboratorio Docker) y <code>proyecto/</code> (el código que subirán a GitHub).</p>
+<div class="callout checkpoint"><strong>Checkpoint</strong><p><code>docker run --rm hello-world</code> muestra «Hello from Docker!» y <code>git --version</code> responde una versión.</p></div>
+</div></article>
+<article class="card gx" id="p1"><div class="head"><span class="num">Paso 1 · 20 min</span><h3>Levanten el laboratorio (Jenkins + taller)</h3><label class="chk"><input type="checkbox" data-paso="p1"> Hecho</label></div><div class="cuerpo">
+<p>Jenkins corre dentro de Docker. Junto a él se crea un segundo contenedor, <strong>taller</strong>, con Python, pipenv, pytest y Doxygen: así no instalan nada más en su equipo.</p>
+<div class="code"><div class="code-bar"><span>Terminal · carpeta jenkins/</span><button type="button" class="copy" aria-label="Copiar al portapapeles">Copiar</button></div><pre><code>cd sistema_alumnos/jenkins
+docker compose up -d --build
+docker compose ps</code></pre></div>
+<p>La primera vez tarda 3 a 5 minutos (mientras esperan, hagan el Paso 3.1). Deben ver dos contenedores <em>Up</em>: <code>jenkins-alumnos</code> y <code>taller-alumnos</code>.</p>
+<h3>Configuración inicial de Jenkins</h3>
+<p>Obtengan la contraseña de desbloqueo:</p>
+<div class="code"><div class="code-bar"><span>Terminal · carpeta jenkins/</span><button type="button" class="copy" aria-label="Copiar al portapapeles">Copiar</button></div><pre><code>docker compose exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword</code></pre></div>
+<ol>
+  <li>Abran <code>http://localhost:8080</code> y péguenla en <em>Unlock Jenkins</em>.</li>
+  <li>Elijan <strong>Install suggested plugins</strong> (tarda unos minutos).</li>
+  <li>Creen su usuario administrador (anoten la clave: no hay recuperación fácil).</li>
+  <li>Dejen la URL como <code>http://localhost:8080/</code> y pulsen <em>Start using Jenkins</em>.</li>
+</ol>
+<div class="callout evidencia"><strong>Evidencia E1</strong><p>Captura de <code>docker compose ps</code> y del panel de Jenkins ya configurado.</p></div>
+<div class="callout checkpoint"><strong>Checkpoint</strong><p>Ven el Dashboard en <code>http://localhost:8080</code> y <code>docker compose ps</code> muestra los dos contenedores.</p></div>
+</div></article>
+<article class="card gx" id="p2"><div class="head"><span class="num">Paso 2 · 10 min</span><h3>Creen el Pipfile con pipenv</h3><label class="chk"><input type="checkbox" data-paso="p2"> Hecho</label></div><div class="cuerpo">
+<p>El pipeline instala con <code>pipenv install --deploy</code> y por eso necesita el <code>Pipfile.lock</code> (versiones exactas y hashes de lo que se instala). Ejecuten desde <code>jenkins/</code>:</p>
+<div class="code"><div class="code-bar"><span>Terminal · carpeta jenkins/</span><button type="button" class="copy" aria-label="Copiar al portapapeles">Copiar</button></div><pre><code>docker compose exec taller pipenv install -r requirements.txt
+docker compose exec taller pipenv install --dev pytest
+docker compose exec taller pipenv run pytest</code></pre></div>
+<div class="callout checkpoint"><strong>Checkpoint</strong><p>En <code>proyecto/</code> aparecieron <code>Pipfile</code> y <code>Pipfile.lock</code>, y pytest informa <code>9 passed</code> (los <em>warnings</em> son normales).</p></div>
+</div></article>
+<article class="card gx" id="p3"><div class="head"><span class="num">Paso 3 · 25 min</span><h3>Repositorio en GitHub y pipeline base en Jenkins</h3><label class="chk"><input type="checkbox" data-paso="p3"> Hecho</label></div><div class="cuerpo">
+<h3>3.1 Creen el repositorio</h3>
+<p>En GitHub: <em>New repository</em> → nombre <code>sistema-alumnos</code> → <strong>Public</strong> (así Jenkins lo clona sin credenciales) → no marquen README, .gitignore ni licencia → <em>Create repository</em>.</p>
+<h3>3.2 Suban el proyecto</h3>
+<div class="code"><div class="code-bar"><span>Terminal · carpeta proyecto/</span><button type="button" class="copy" aria-label="Copiar al portapapeles">Copiar</button></div><pre><code>cd ../proyecto
+git init -b main
+git add .
+git status
+git commit -m &quot;Proyecto inicial: Sistema Alumnos&quot;
+git remote add origin https://github.com/TU_USUARIO/sistema-alumnos.git
+git push -u origin main</code></pre></div>
+<p>Antes del commit, <code>git status</code> debe mostrar <code>Pipfile</code> y <code>Pipfile.lock</code>, y no <code>.venv/</code> ni <code>reports/</code>. GitHub ya no acepta la contraseña de la cuenta: el navegador les pedirá iniciar sesión.</p>
+<h3>3.3 Creen el job de Jenkins</h3>
+<ol>
+  <li><em>Dashboard → New Item</em> → nombre <code>sistema-alumnos</code> → tipo <strong>Pipeline</strong> → OK.</li>
+  <li>En la sección <strong>Pipeline</strong>: <em>Definition</em> = <code>Pipeline script from SCM</code> · <em>SCM</em> = <code>Git</code> · <em>Repository URL</em> = la URL de su repositorio (termina en <code>.git</code>) · <em>Credentials</em> = <code>- none -</code> · <em>Branch Specifier</em> = <code>*/main</code> · <em>Script Path</em> = <code>Jenkinsfile</code>.</li>
+  <li><em>Save</em> y luego <strong>Build Now</strong>. Abran el build #1 → <em>Console Output</em> y lean el log de abajo hacia arriba.</li>
+</ol>
+<p>Abran <code>proyecto/Jenkinsfile</code>: solo tiene las etapas <strong>Build</strong> y <strong>Test</strong> y varios comentarios <code>&gt;&gt;&gt; [ETIQUETA]</code>, que son los lugares donde pegarán etapas más adelante. Los que empiezan con <code>[A-…]</code> pertenecen a la otra guía: déjenlos como están.</p>
+<div class="callout evidencia"><strong>Evidencia E2</strong><p>Captura de la configuración del job (sección Pipeline) y del build #1 exitoso (Build y Test en verde).</p></div>
+<div class="callout checkpoint"><strong>Checkpoint</strong><p>El build #1 termina en <strong>SUCCESS</strong> y el log muestra <code>9 passed</code>.</p></div>
+</div></article>
+
+  <h2 class="grupo gb" id="g-b1">Documentación y trazabilidad</h2>
+
+<div class="callout ojo"><strong>Regla de la Parte B.</strong> Desde B4 Jenkins también hace commits en su repositorio. <strong>Antes de editar, siempre <code>git pull</code></strong>; si no, su <code>git push</code> será rechazado.
+<div class="code"><div class="code-bar"><span>Terminal · carpeta proyecto/</span><button type="button" class="copy" aria-label="Copiar al portapapeles">Copiar</button></div><pre><code>git pull</code></pre></div></div>
+
+<article class="card gb" id="b1"><div class="head"><span class="num">B1 · 10 min</span><h3>Configuren Doxygen</h3><label class="chk"><input type="checkbox" data-paso="b1"> Hecho</label></div><div class="cuerpo">
+<p>Doxygen genera documentación (HTML) a partir de los comentarios del código. Agreguen al final de <code>proyecto/Doxyfile</code>:</p>
+<div class="code"><div class="code-bar"><span>Doxyfile · agregar al final</span><button type="button" class="copy" aria-label="Copiar al portapapeles">Copiar</button></div><pre><code>PROJECT_NUMBER         = $(APP_VERSION)
+PROJECT_BRIEF          = &quot;API de gestión de alumnos - OCY1102&quot;
+
+INPUT                  = app.py
+FILE_PATTERNS          = *.py
+OPTIMIZE_OUTPUT_JAVA   = YES
+
+QUIET                  = YES
+WARN_IF_UNDOCUMENTED   = YES
+WARN_NO_PARAMDOC       = YES
+WARN_LOGFILE           = reports/doxygen_warnings.log</code></pre></div>
+<ul>
+  <li><code>PROJECT_NUMBER = $(APP_VERSION)</code>: toma la versión que define el pipeline (<code>1.0.N+commit</code>), así cada documento queda etiquetado con su build y su commit.</li>
+  <li><code>INPUT</code>, <code>FILE_PATTERNS</code>: documentan solo <code>app.py</code> (sin tests ni scripts).</li>
+  <li><code>WARN_…</code>: avisan de lo que falta documentar y guardan las advertencias en un archivo que el pipeline revisa.</li>
+</ul>
+<p>Generen la documentación en el taller y lean las advertencias:</p>
+<div class="code"><div class="code-bar"><span>Terminal · carpeta jenkins/</span><button type="button" class="copy" aria-label="Copiar al portapapeles">Copiar</button></div><pre><code>docker compose exec taller bash -c &quot;mkdir -p reports &amp;&amp; APP_VERSION=local doxygen Doxyfile&quot;
+docker compose exec taller cat reports/doxygen_warnings.log</code></pre></div>
+<p>Abran <code>proyecto/docs/html/index.html</code> en el navegador: verán el encabezado con la versión <code>local</code>.</p>
+<div class="callout checkpoint"><strong>Checkpoint</strong><p>El log muestra unas 9 advertencias (funciones y variables sin documentar). Si el número difiere un poco, está bien: lean qué dice cada una.</p></div>
+</div></article>
+<article class="card gb" id="b2"><div class="head"><span class="num">B2 · 20 min</span><h3>Documenten el código hasta llegar a 0 advertencias</h3><label class="chk"><input type="checkbox" data-paso="b2"> Hecho</label></div><div class="cuerpo">
+<p>Doxygen no entiende la docstring actual de <code>hello()</code> («Parámetros: … Retorna: …»): necesita su propia sintaxis.</p>
+<ul>
+  <li><strong>Funciones</strong>: docstring que empieza con <code>"""!</code> y usa <code>@brief</code>, <code>@param</code> y <code>@return</code>.</li>
+  <li><strong>Variables de módulo</strong>: un comentario <code>##</code> en la línea anterior.</li>
+  <li>El módulo ya está documentado al inicio de <code>app.py</code> (mírenlo): si no lo estuviera, Doxygen no avisaría de nada y la documentación saldría vacía.</li>
+</ul>
+<div class="code"><div class="code-bar"><span>Ejemplo · app.py</span><button type="button" class="copy" aria-label="Copiar al portapapeles">Copiar</button></div><pre><code>## Aplicación Flask principal.
+app = Flask(__name__)
+
+@app.route(&#x27;/alumnos/&lt;int:alumno_id&gt;&#x27;)
+def obtener_alumno(alumno_id):
+    &quot;&quot;&quot;!
+    @brief Obtiene un alumno por su identificador.
+
+    @param alumno_id Identificador numérico del alumno.
+    @return JSON con el alumno, o error 404 si no existe.
+    &quot;&quot;&quot;
+    ...</code></pre></div>
+<p><strong>Su tarea:</strong></p>
+<ol>
+  <li>Documenten todas las funciones y variables de <code>app.py</code> y repitan los dos comandos de B1 hasta que el log quede vacío.</li>
+  <li>Reescriban la docstring de <code>hello()</code> en formato Doxygen. <code>name</code> <strong>no</strong> es un parámetro de la función (viene de la URL): descríbanlo en el texto; si escriben <code>@param name</code>, Doxygen avisará.</li>
+  <li>Ejecuten <code>pytest</code> otra vez: documentar no debe romper nada.</li>
+</ol>
+<details class="pista"><summary>Me queda una advertencia sobre la variable <code>debug</code>. ¿Por qué?</summary>
+<p>Doxygen interpreta <code>debug=…</code> dentro de <code>app.run(...)</code> como una variable de módulo, porque la llamada está suelta al final del archivo. Si la llamada vive dentro de una función documentada (por ejemplo <code>main()</code>), el problema desaparece. Dejen <code>if __name__ == '__main__': main()</code> al final.</p></details>
+<p>Cuando terminen, borren la carpeta generada: la versionará Jenkins en B4 y, si queda aquí, más adelante <code>git pull</code> se quejará.</p>
+<div class="code"><div class="code-bar"><span>Terminal · carpeta jenkins/</span><button type="button" class="copy" aria-label="Copiar al portapapeles">Copiar</button></div><pre><code>docker compose exec taller rm -rf docs</code></pre></div>
+<div class="callout evidencia"><strong>Evidencia E6</strong><p>Captura de la página de Doxygen (con la función documentada) y del log de advertencias vacío. Háganla antes de borrar <code>docs/</code>.</p></div>
+<div class="callout checkpoint"><strong>Checkpoint</strong><p><code>reports/doxygen_warnings.log</code> está vacío y el HTML lista todas las funciones con su descripción.</p></div>
+</div></article>
+<article class="card gb" id="b3"><div class="head"><span class="num">B3 · 15 min</span><h3>Etapa «Generate Documentation» en el pipeline</h3><label class="chk"><input type="checkbox" data-paso="b3"> Hecho</label></div><div class="cuerpo">
+<p>Reemplacen la línea <code>&gt;&gt;&gt; [B-DOCS]</code> del <code>Jenkinsfile</code> por:</p>
+<div class="code"><div class="code-bar"><span>Jenkinsfile · reemplaza la línea [B-DOCS]</span><button type="button" class="copy" aria-label="Copiar al portapapeles">Copiar</button></div><pre><code>        stage(&#x27;Generate Documentation&#x27;) {
+            steps {
+                catchError(buildResult: &#x27;UNSTABLE&#x27;, stageResult: &#x27;UNSTABLE&#x27;) {
+                    sh &#x27;&#x27;&#x27;#!/bin/bash
+                        set -eu
+                        mkdir -p reports
+                        rm -rf docs/html reports/doxygen_warnings.log
+                        doxygen Doxyfile
+                        if [ -s reports/doxygen_warnings.log ]; then
+                            echo &quot;Doxygen encontró código sin documentar o mal documentado:&quot;
+                            cat reports/doxygen_warnings.log
+                            exit 1
+                        fi
+                        echo &quot;Documentación generada sin advertencias en docs/html&quot;
+                    &#x27;&#x27;&#x27;
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: &#x27;docs/html/**&#x27;, allowEmptyArchive: true
+                }
+            }
+        }</code></pre></div>
+<p>Si Doxygen emite advertencias, el build queda <strong>INESTABLE</strong>: es el control de calidad de la documentación.</p>
+<div class="code"><div class="code-bar"><span>Terminal · carpeta proyecto/</span><button type="button" class="copy" aria-label="Copiar al portapapeles">Copiar</button></div><pre><code>git add -A
+git commit -m &quot;Parte B: Doxygen y etapa Generate Documentation&quot;
+git push</code></pre></div>
+<p>Pulsen <strong>Build Now</strong>. Resultado esperado: SUCCESS. Si queda INESTABLE, abran el log de la etapa: Doxygen indica qué falta documentar.</p>
+<div class="callout checkpoint"><strong>Checkpoint</strong><p>Build <strong>SUCCESS</strong> con la etapa Generate Documentation en verde y el log «Documentación generada sin advertencias».</p></div>
+</div></article>
+<article class="card gb" id="b4"><div class="head"><span class="num">B4 · 20 min</span><h3>«Version Control»: versionar la documentación</h3><label class="chk"><input type="checkbox" data-paso="b4"> Hecho</label></div><div class="cuerpo">
+<p>Para que Jenkins pueda escribir en GitHub necesita una credencial. Se aplica el principio de <strong>mínimo privilegio</strong>: un token solo para este repositorio.</p>
+<h3>4.1 Creen el token</h3>
+<ol>
+  <li>GitHub → foto de perfil → <em>Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token</em>.</li>
+  <li><em>Expiration</em>: 7 días. <em>Repository access</em>: <strong>Only select repositories</strong> → <code>sistema-alumnos</code>.</li>
+  <li><em>Repository permissions → Contents</em>: <strong>Read and write</strong> (nada más).</li>
+  <li>Generen el token y cópienlo en ese momento (GitHub no lo vuelve a mostrar).</li>
+</ol>
+<h3>4.2 Guárdenlo en Jenkins</h3>
+<p><em>Manage Jenkins → Credentials → Global credentials → Add Credentials</em>: Kind <code>Username with password</code> · Username: su usuario de GitHub · Password: el token · ID: <code>github-token</code> (exacto) → <em>Create</em>.</p>
+<div class="callout ojo"><strong>Nunca</strong> peguen el token en el <code>Jenkinsfile</code>, en un script, en el informe ni en una captura. Si se filtra, revóquenlo en GitHub de inmediato.</div>
+<h3>4.3 Agreguen la etapa</h3>
+<p>Reemplacen la línea <code>&gt;&gt;&gt; [B-VERSION]</code>:</p>
+<div class="code"><div class="code-bar"><span>Jenkinsfile · reemplaza la línea [B-VERSION]</span><button type="button" class="copy" aria-label="Copiar al portapapeles">Copiar</button></div><pre><code>        stage(&#x27;Version Control&#x27;) {
+            // Solo se versiona la documentación de builds 100% correctos y NO en las ejecuciones programadas
+            when {
+                allOf {
+                    expression { currentBuild.currentResult == &#x27;SUCCESS&#x27; }
+                    not { triggeredBy &#x27;TimerTrigger&#x27; }
+                }
+            }
+            steps {
+                sh &#x27;bash scripts/trazabilidad.sh&#x27;
+                withCredentials([usernamePassword(credentialsId: &#x27;github-token&#x27;,
+                                                  usernameVariable: &#x27;GIT_USER&#x27;,
+                                                  passwordVariable: &#x27;GIT_TOKEN&#x27;)]) {
+                    sh &#x27;&#x27;&#x27;#!/bin/bash
+                        set -eu
+                        git config user.name  &quot;Jenkins CI&quot;
+                        git config user.email &quot;jenkins@localhost&quot;
+                        git add docs
+                        if git diff --cached --quiet; then
+                            echo &quot;No hay cambios en docs/: nada que versionar&quot;
+                            exit 0
+                        fi
+                        # [skip ci] evita que este commit dispare otro build si algún día se activa un webhook
+                        git commit -q -m &quot;docs: documentación del build #${BUILD_NUMBER} (${APP_VERSION}) [skip ci]&quot;
+                        git tag -a &quot;build-${BUILD_NUMBER}-${GIT_SHA}&quot; -m &quot;Build ${BUILD_NUMBER} - versión ${APP_VERSION}&quot;
+
+                        # Credenciales vía GIT_ASKPASS: el token no queda en la URL, ni en .git/config, ni en el log
+                        ASKPASS=&quot;$(mktemp)&quot;
+                        trap &#x27;rm -f &quot;$ASKPASS&quot;&#x27; EXIT
+                        printf &#x27;#!/bin/sh\ncase &quot;$1&quot; in Username*) echo &quot;$GIT_USER&quot; ;; *) echo &quot;$GIT_TOKEN&quot; ;; esac\n&#x27; &gt; &quot;$ASKPASS&quot;
+                        chmod 700 &quot;$ASKPASS&quot;
+                        GIT_ASKPASS=&quot;$ASKPASS&quot; GIT_TERMINAL_PROMPT=0 git push origin HEAD:main --follow-tags
+                    &#x27;&#x27;&#x27;
+                }
+            }
+        }</code></pre></div>
+<p>Esta etapa solo corre en builds 100 % correctos. Agrega una fila a <code>docs/TRAZABILIDAD.md</code> (<code>scripts/trazabilidad.sh</code>), deja un commit con <code>[skip ci]</code> y una etiqueta <code>build-N-commit</code>, y entrega el token a Git con <code>GIT_ASKPASS</code> para que no quede en la URL ni en el log.</p>
+<h3>4.4 Ejecuten</h3>
+<div class="code"><div class="code-bar"><span>Terminal · carpeta proyecto/</span><button type="button" class="copy" aria-label="Copiar al portapapeles">Copiar</button></div><pre><code>git add -A
+git commit -m &quot;Parte B: etapa Version Control&quot;
+git push</code></pre></div>
+<p>Pulsen <strong>Build Now</strong> y luego traigan lo que hizo Jenkins:</p>
+<div class="code"><div class="code-bar"><span>Terminal · carpeta proyecto/</span><button type="button" class="copy" aria-label="Copiar al portapapeles">Copiar</button></div><pre><code>git pull --tags
+git log --oneline --decorate -5
+git tag --list &quot;build-*&quot;</code></pre></div>
+<div class="callout evidencia"><strong>Evidencia E7</strong><p>En GitHub: el commit de <em>Jenkins CI</em> con la carpeta <code>docs/</code>, la etiqueta <code>build-N-…</code> y el contenido de <code>docs/TRAZABILIDAD.md</code>.</p></div>
+<div class="callout checkpoint"><strong>Checkpoint</strong><p>Build SUCCESS; en GitHub aparece un commit nuevo de Jenkins, una etiqueta <code>build-…</code> y <code>docs/TRAZABILIDAD.md</code> con una fila.</p></div>
+</div></article>
+<article class="card gb" id="b5"><div class="head"><span class="num">B5 · 10 min</span><h3>«Deploy» en el entorno de prueba</h3><label class="chk"><input type="checkbox" data-paso="b5"> Hecho</label></div><div class="cuerpo">
+<p>Reemplacen la línea <code>&gt;&gt;&gt; [B-DEPLOY]</code>:</p>
+<div class="code"><div class="code-bar"><span>Jenkinsfile · reemplaza la línea [B-DEPLOY]</span><button type="button" class="copy" aria-label="Copiar al portapapeles">Copiar</button></div><pre><code>        stage(&#x27;Deploy&#x27;) {
+            when { expression { currentBuild.currentResult == &#x27;SUCCESS&#x27; } }
+            steps {
+                // Despliega en el &quot;entorno de prueba&quot; (http://localhost:5000) y ejecuta una prueba de humo
+                sh &#x27;bash scripts/deploy_test.sh&#x27;
+            }
+        }</code></pre></div>
+<p>Antes de ejecutar, lean <code>scripts/deploy_test.sh</code>: detiene la versión anterior, copia la aplicación, instala solo las dependencias de ejecución, la arranca con <code>APP_VERSION</code> y hace una <strong>prueba de humo</strong> (<code>/health</code>, <code>/alumnos</code> y que <code>/version</code> coincida con el build).</p>
+<div class="code"><div class="code-bar"><span>Terminal · carpeta proyecto/</span><button type="button" class="copy" aria-label="Copiar al portapapeles">Copiar</button></div><pre><code>git add -A
+git commit -m &quot;Parte B: etapa Deploy&quot;
+git push</code></pre></div>
+<p>Pulsen <strong>Build Now</strong>. Al terminar, abran en el navegador:</p>
+<ul>
+  <li><code>http://localhost:5000/version</code> → debe mostrar la versión del build que acaba de terminar.</li>
+  <li><code>http://localhost:5000/alumnos</code> → la lista de alumnos.</li>
+</ul>
+<div class="callout evidencia"><strong>Evidencia E8</strong><p>Pipeline completo en verde (las 5 etapas: Build, Test, Generate Documentation, Version Control y Deploy) y el navegador mostrando <code>/version</code> de la app desplegada.</p></div>
+<div class="callout checkpoint"><strong>Checkpoint</strong><p>Pipeline completo en <strong>SUCCESS</strong> y <code>localhost:5000/version</code> coincide con el build.</p></div>
+</div></article>
+<article class="card gb" id="b6"><div class="head"><span class="num">B6 · 10 min</span><h3>Recorran la cadena de trazabilidad</h3><label class="chk"><input type="checkbox" data-paso="b6"> Hecho</label></div><div class="cuerpo">
+<p>La trazabilidad responde: «Esto que está corriendo, ¿de qué código salió, quién lo construyó y dónde está su documentación?». Partan de lo único que ven en producción:</p>
+<div class="code"><div class="code-bar"><span>Terminal</span><button type="button" class="copy" aria-label="Copiar al portapapeles">Copiar</button></div><pre><code>curl http://localhost:5000/version</code></pre></div>
+<p>(Si no tienen <code>curl</code>, abran la dirección en el navegador.) La respuesta es algo como <code>{"version": "1.0.N+abc1234", …}</code>.</p>
+<div class="scroll"><table><thead><tr><th>Pregunta</th><th>Cómo la responden</th></tr></thead><tbody>
+<tr><td>1. ¿Qué build de Jenkins lo generó?</td><td>El número <code>N</code> de la versión → <code>http://localhost:8080/job/sistema-alumnos/N/</code></td></tr>
+<tr><td>2. ¿Con qué código?</td><td><code>git show abc1234</code> (el commit después del <code>+</code>)</td></tr>
+<tr><td>3. ¿Qué etiqueta lo marca?</td><td><code>git tag --list "build-N-*"</code></td></tr>
+<tr><td>4. ¿Dónde está su documentación?</td><td><code>docs/html/index.html</code> (la versión aparece en el encabezado) y la fila N de <code>docs/TRAZABILIDAD.md</code></td></tr>
+<tr><td>5. ¿Estaba sano ese build?</td><td>Columnas <em>Pruebas</em> y <em>Advertencias Doxygen</em> de esa fila (la de pip-audit dice <code>n/a</code> si no hicieron la otra guía)</td></tr>
+</tbody></table></div>
+<div class="callout pensar"><strong>Para el informe</strong><p>Escriban esa cadena con los valores reales de <em>su</em> último build (número, commit, etiqueta) y expliquen en una frase por qué la versión incluye el commit corto.</p></div>
+<div class="callout checkpoint"><strong>Fin de la guía.</strong><p>Tienen un pipeline de cinco etapas con documentación completa, versionada en Git y un despliegue trazable hasta su commit.</p></div>
+</div></article>
+
+  <h2 class="grupo gx" id="g-entrega">Cierre</h2>
+
+<article class="card gx" id="entrega"><div class="head"><span class="num">Entrega · 35 min</span><h3>Qué entregar</h3></div><div class="cuerpo">
+<p>Entreguen <strong>capturas del pipeline</strong>, los <strong>archivos de configuración</strong> y un <strong>informe</strong> con el proceso, las pruebas, los resultados y las mejoras propuestas. El formato y el medio de entrega los indica su docente.</p>
+<ul class="checklist">
+  <li><label><input type="checkbox" data-key="e1"><span> <strong>E1</strong> · Laboratorio levantado (<code>docker compose ps</code> + panel de Jenkins).</span></label></li>
+  <li><label><input type="checkbox" data-key="e2"><span> <strong>E2</strong> · Configuración del job y build #1 exitoso.</span></label></li>
+  <li><label><input type="checkbox" data-key="e6"><span> <strong>E6</strong> · Documentación Doxygen generada, 0 advertencias.</span></label></li>
+  <li><label><input type="checkbox" data-key="e7"><span> <strong>E7</strong> · Commit de Jenkins, etiqueta y <code>TRAZABILIDAD.md</code> en GitHub.</span></label></li>
+  <li><label><input type="checkbox" data-key="e8"><span> <strong>E8</strong> · Pipeline completo en verde y <code>/version</code> de la app desplegada.</span></label></li>
+  <li><label><input type="checkbox" data-key="f1"><span> <strong>Archivos</strong> · <code>Jenkinsfile</code>, <code>Doxyfile</code>, <code>app.py</code> documentado y <code>docs/TRAZABILIDAD.md</code>.</span></label></li>
+  <li><label><input type="checkbox" data-key="f2"><span> <strong>Informe</strong> · basado en <code>INFORME_plantilla.md</code>, con la cadena de trazabilidad de B6 (valores reales de su último build) y al menos 3 mejoras propuestas.</span></label></li>
+  <li><label><input type="checkbox" data-key="f3"><span> <strong>Seguridad</strong> · ninguna captura ni archivo contiene el token de GitHub.</span></label></li>
+  <li><label><input type="checkbox" data-key="f4"><span> <strong>Pareja</strong> · ambos integrantes tienen commits en el repositorio.</span></label></li>
+</ul>
+<h3>Al terminar, limpien</h3>
+<div class="code"><div class="code-bar"><span>Terminal · carpeta jenkins/</span><button type="button" class="copy" aria-label="Copiar al portapapeles">Copiar</button></div><pre><code>docker compose down        # apaga los contenedores y conserva los datos de Jenkins
+docker compose down -v     # además BORRA los datos de Jenkins (incluidas credenciales)</code></pre></div>
+<p>Revoquen el token en GitHub (<em>Settings → Developer settings → Fine-grained tokens</em>) y, si usaron un equipo compartido, borren la carpeta del proyecto.</p>
+</div></article>
+
+<h2 id="g-fallas">Si algo falla</h2>
+<div class="box">
+<p class="small">Lean siempre el <em>Console Output</em> de abajo hacia arriba. Si se traban más de 10 minutos, miren esta lista y después consulten a su docente.</p>
+
+<details><summary>El puerto 8080 o 5000 ya está ocupado</summary>
+<p>En <code>jenkins/docker-compose.yml</code> cambien el número de la izquierda (por ejemplo <code>"127.0.0.1:8081:8080"</code>), ejecuten <code>docker compose up -d</code> y usen el puerto nuevo.</p></details>
+<details><summary>«the input device is not a TTY» (Git Bash en Windows)</summary>
+<p>Agreguen <code>-T</code>: <code>docker compose exec -T taller …</code>, o usen PowerShell.</p></details>
+<details><summary>El build falla en <code>pipenv install --deploy</code> («Pipfile.lock is out of date»)</summary>
+<p>Editaron el <code>Pipfile</code> sin regenerar el lock. Ejecuten <code>docker compose exec taller pipenv lock</code>, hagan commit de <code>Pipfile.lock</code> y suban.</p></details>
+<details><summary><code>git push</code> es rechazado («non-fast-forward» / «fetch first»)</summary>
+<p>Jenkins subió un commit mientras editaban. Ejecuten <code>git pull --rebase</code> y repitan <code>git push</code>.</p></details>
+<details><summary><code>git pull</code> dice que archivos de <code>docs/</code> serían sobrescritos</summary>
+<p>Generaron <code>docs/</code> localmente y Jenkins subió la suya. Borren la local (<code>docker compose exec taller rm -rf docs</code>) y repitan <code>git pull</code>.</p></details>
+<details><summary>«Could not find credentials entry with ID 'github-token'» o «Authentication failed»</summary>
+<p>El ID debe ser exactamente <code>github-token</code>. Revisen que el usuario sea el suyo de GitHub, que el token no haya expirado y que tenga <em>Contents: Read and write</em> sobre ese repositorio.</p></details>
+<details><summary>La etapa Deploy falla («Address already in use» o la app no responde)</summary>
+<p>Queda un proceso de un despliegue anterior. Ejecuten <code>docker compose restart jenkins</code> y repitan el build. El detalle está en <code>docker compose exec jenkins cat /var/jenkins_home/entorno-prueba/app.log</code>.</p></details>
+<details><summary>Doxygen: errores de <code>@param</code>, de etiquetas o documentación vacía</summary>
+<ul>
+  <li><em>«argument 'name' of command @param is not found»</em>: documentaron un parámetro que la función no recibe. Descríbanlo en el texto, sin <code>@param</code>.</li>
+  <li><em>«Unsupported xml/html tag &lt;…&gt; found»</em>: escribieron algo entre &lt; y &gt; en una docstring. Escríbanlo sin esos signos (por ejemplo <code>1.0.N+commit</code>).</li>
+  <li>Documentación vacía y sin advertencias: falta la cabecera <code>"""!</code> con <code>@file</code> al inicio de <code>app.py</code>, o una docstring empieza con <code>"""</code> en vez de <code>"""!</code>.</li>
+</ul></details>
+<details><summary>La documentación vista desde «Build Artifacts» no tiene estilos</summary>
+<p>Es normal: Jenkins bloquea scripts y estilos de los artefactos por seguridad. Ábranla desde el repositorio (después de B4).</p></details>
+
+</div>
+
+</main>
+
+<footer>Actividad «Sistema Alumnos» · Guía 2 de 2 (versión corta) · OCY1102 Ciberseguridad en desarrollo</footer>
+
+<script>
+(function(){
+  var KEY='sistema-alumnos-guia-corta-v1', estado={};
+  try{estado=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){estado={}}
+  function guardar(){try{localStorage.setItem(KEY,JSON.stringify(estado))}catch(e){}}
+  var $=function(s){return document.querySelector(s)};
+
+  /* tema claro/oscuro */
+  var root=document.documentElement, TK='sistema-alumnos-tema';
+  try{var t0=localStorage.getItem(TK);if(t0)root.setAttribute('data-theme',t0)}catch(e){}
+  $('#themeBtn').addEventListener('click',function(){
+    var cur=root.getAttribute('data-theme');
+    var dark=cur==='dark'||(!cur&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);
+    var next=dark?'light':'dark';root.setAttribute('data-theme',next);
+    try{localStorage.setItem(TK,next)}catch(e){}
+  });
+
+  /* avance */
+  var pasos=[].slice.call(document.querySelectorAll('input[data-paso]'));
+  var checks=[].slice.call(document.querySelectorAll('input[data-key]'));
+  function pintar(){
+    var n=0;
+    pasos.forEach(function(c){var id=c.getAttribute('data-paso');c.checked=!!estado['p:'+id];if(c.checked)n++;
+      c.closest('.card').classList.toggle('done',c.checked)});
+    checks.forEach(function(c){c.checked=!!estado['k:'+c.getAttribute('data-key')]});
+    $('#meterBar').style.width=(100*n/pasos.length)+'%';
+    $('#meterTxt').textContent='Pasos '+n+' / '+pasos.length;
+  }
+  pasos.forEach(function(c){c.addEventListener('change',function(){estado['p:'+c.getAttribute('data-paso')]=c.checked;guardar();pintar()})});
+  checks.forEach(function(c){c.addEventListener('change',function(){estado['k:'+c.getAttribute('data-key')]=c.checked;guardar();pintar()})});
+  pintar();
+
+  /* «Seguir»: salta al primer paso sin marcar */
+  $('#seguirBtn').addEventListener('click',function(){
+    var c=pasos.filter(function(x){return !x.checked})[0];
+    var t=document.getElementById(c?c.getAttribute('data-paso'):'entrega');
+    if(t)t.scrollIntoView({behavior:'smooth',block:'start'});
+  });
+
+  /* copiar */
+  document.addEventListener('click',function(ev){
+    var b=ev.target.closest('.copy');if(!b)return;
+    var txt=b.closest('.code').querySelector('code').textContent;
+    function ok(){var o=b.textContent;b.textContent='Copiado';b.classList.add('ok');setTimeout(function(){b.textContent=o;b.classList.remove('ok')},1400)}
+    function fallback(){var t=document.createElement('textarea');t.value=txt;t.style.position='fixed';t.style.opacity='0';document.body.appendChild(t);t.select();
+      try{document.execCommand('copy');ok()}catch(e){b.textContent='Selecciona y copia'}document.body.removeChild(t)}
+    if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(txt).then(ok,fallback)}else{fallback()}
+  });
+
+  /* al imprimir se abren todos los desplegables */
+  var abiertos=[];
+  window.addEventListener('beforeprint',function(){abiertos=[];[].forEach.call(document.querySelectorAll('details'),function(d){abiertos.push(d.open);d.open=true})});
+  window.addEventListener('afterprint',function(){[].forEach.call(document.querySelectorAll('details'),function(d,i){d.open=abiertos[i]})});
+})();
+</script>
+</body>
+</html>
