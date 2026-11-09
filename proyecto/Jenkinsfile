@@ -72,4 +72,134 @@ pipeline {
     }
 }
 
-// >>> [A-FUNCION] (Parte A, paso A4): aquí va la función notificar()
+// Jenkinsfile - Pipeline de "Sistema Alumnos" (OCY1102)
+pipeline {
+    agent any
+
+    options {
+        timestamps()
+        timeout(time: 30, unit: 'MINUTES')
+        disableConcurrentBuilds()
+    }
+
+    environment {
+        PIPENV_VENV_IN_PROJECT    = '1'
+        PIPENV_IGNORE_VIRTUALENVS = '1'
+        PIPENV_NOSPIN             = '1'
+    }
+
+    stages {
+        stage('Build') {
+            steps {
+                dir('proyecto') {
+                    script {
+                        def sha = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()
+                        env.GIT_SHA     = sha
+                        env.APP_VERSION = "1.0.${env.BUILD_NUMBER}+${sha}"
+                    }
+                    echo "Versión de este build: ${env.APP_VERSION}"
+                    sh 'rm -rf .venv reports && mkdir -p reports'
+                    sh 'pipenv install --dev --deploy'
+                    sh 'pipenv run python -m compileall -q app.py'
+                }
+            }
+        }
+
+        stage('Test') {
+            steps {
+                dir('proyecto') {
+                    sh 'pipenv run pytest --junitxml=reports/junit.xml'
+                }
+            }
+            post {
+                always {
+                    dir('proyecto') {
+                        junit allowEmptyResults: true, testResults: 'reports/junit.xml'
+                    }
+                }
+            }
+        }
+
+        // Paso B3: Generar documentación
+        stage('Generate Documentation') {
+            steps {
+                dir('proyecto') {
+                    catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                        sh '''#!/bin/bash
+                            set -eu
+                            mkdir -p reports
+                            rm -rf docs/html reports/doxygen_warnings.log
+                            doxygen Doxyfile
+                            if [ -s reports/doxygen_warnings.log ]; then
+                                echo "Doxygen encontró código sin documentar o mal documentado:"
+                                cat reports/doxygen_warnings.log
+                                exit 1
+                            fi
+                            echo "Documentación generada sin advertencias en docs/html"
+                        '''
+                    }
+                }
+            }
+            post {
+                always {
+                    dir('proyecto') {
+                        archiveArtifacts artifacts: 'docs/html/**', allowEmptyArchive: true
+                    }
+                }
+            }
+        }
+
+        // Paso B4: Control de Versión y Trazabilidad
+        stage('Version Control') {
+            when {
+                allOf {
+                    expression { currentBuild.currentResult == 'SUCCESS' }
+                    not { triggeredBy 'TimerTrigger' }
+                }
+            }
+            steps {
+                dir('proyecto') {
+                    sh 'bash scripts/trazabilidad.sh'
+                    withCredentials([usernamePassword(credentialsId: 'github-token',
+                                                      usernameVariable: 'GIT_USER',
+                                                      passwordVariable: 'GIT_TOKEN')]) {
+                        sh '''#!/bin/bash
+                            set -eu
+                            git config user.name  "Jenkins CI"
+                            git config user.email "jenkins@localhost"
+                            git add docs
+                            if git diff --cached --quiet; then
+                                echo "No hay cambios en docs/: nada que versionar"
+                                exit 0
+                            fi
+                            git commit -q -m "docs: documentación del build #${BUILD_NUMBER} (${APP_VERSION}) [skip ci]"
+                            git tag -a "build-${BUILD_NUMBER}-${GIT_SHA}" -m "Build ${BUILD_NUMBER} - versión ${APP_VERSION}"
+
+                            ASKPASS="$(mktemp)"
+                            trap 'rm -f "$ASKPASS"' EXIT
+                            printf '#!/bin/sh\ncase "$1" in Username*) echo "$GIT_USER" ;; *) echo "$GIT_TOKEN" ;; esac\n' > "$ASKPASS"
+                            chmod 700 "$ASKPASS"
+                            GIT_ASKPASS="$ASKPASS" GIT_TERMINAL_PROMPT=0 git push origin HEAD:main --follow-tags
+                        '''
+                    }
+                }
+            }
+        }
+
+        // Paso B5: Despliegue en entorno de prueba
+        stage('Deploy') {
+            when { expression { currentBuild.currentResult == 'SUCCESS' } }
+            steps {
+                dir('proyecto') {
+                    sh 'bash scripts/deploy_test.sh'
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: 'proyecto/reports/**, proyecto/docs/html/**', allowEmptyArchive: true
+        }
+    }
+}
